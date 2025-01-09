@@ -1,0 +1,102 @@
+<%- include('../../components/header', { title: 'Files' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
+            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+          </h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">
+            <%= server.description %>
+          </p>
+        </div>
+      </div>
+      
+      <!-- ERROR Messages -->
+      <!-- Todo : Component -->
+      <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 ml-8 mb-8 mr-8 hidden" id="daemonIsDown">
+        <div class="flex">
+            <div class="flex-shrink-0 ml-1.5">
+                <svg class="animate-spin mt-2 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                    </circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </div>
+            <div class="ml-5">
+                <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
+                <div class="text-sm text-red-400/50">
+                    <p><%= req.translations.connectionFailureText %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <div class="flex flex-col lg:flex-row px-8 mt-8">
+        <div class="overflow-hidden rounded-lg shadow-md w-full">
+          <table class="min-w-full bg-white dark:bg-neutral-800">
+            <thead class="bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-300">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Extension</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Category</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Size</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
+              <% files.forEach(file => { %>
+                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition cursor-pointer" onclick="window.location.href='/server/<%= server.UUID %>/files/<%= encodeURIComponent(file.name) %>'">
+                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                    <%= file.name %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                    <%= file.type || 'Unknown' %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                    <%= file.extension %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                    <%= file.category || 'Not Categorized' %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                    <% 
+                      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                      let size = file.size;
+                      let unitIndex = 0;
+                      while (size >= 1024 && unitIndex < sizes.length - 1) {
+                        size /= 1024;
+                        unitIndex++;
+                      }
+                    %>
+                    <%= size.toFixed(2) %> <%= sizes[unitIndex] %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/footer') %>
