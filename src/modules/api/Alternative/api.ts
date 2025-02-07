@@ -57,71 +57,71 @@ const coreModule: Module = {
     const router = Router();
 
     router.get('/api/application/users', validator, async (req: Request, res: Response) => {
-        try {
-            const filter = typeof req.query.filter === 'string' 
-                ? JSON.parse(req.query.filter) 
-                : req.query.filter;
+      try {
+        const filter = typeof req.query.filter === 'string' 
+          ? JSON.parse(req.query.filter) 
+          : req.query.filter;
     
-            const include = req.query.include;
-            const users = await prisma.users.findMany({
-                where: filter || {},
-            });
+        const include = req.query.include;
+        const users = await prisma.users.findMany({
+          where: filter || {},
+        });
     
-            let serverData = null;
-            if (include && include === 'servers') {
-                serverData = await prisma.server.findMany({
-                    where: { ownerId: { in: users.map((user) => user.id) } },
-                    include: { node: true, owner: true },
-                });
-            }
-    
-            const response = users.map((user) => {
-                const userData: any = {
-                    object: 'user',
-                    attributes: {
-                        id: user.id,
-                        username: user.username,
-                        email: user.email,
-                        root_admin: user.isAdmin,
-                    },
-                    relationships: {
-                        servers: [],
-                    },
-                };
-    
-                if (include && include === 'servers' && serverData) {
-                    userData.relationships.servers = serverData.filter((server) => server.ownerId === user.id).map((server) => ({
-                        object: 'server',
-                        attributes: {
-                            id: server.id,
-                            name: server.name,
-                            node: server.node,
-                        },
-                    }));
-                }
-    
-                return userData;
-            });
-    
-            res.json({
-                object: 'list',
-                data: response,
-                meta: {
-                    pagination: {
-                        total: users.length,
-                        count: users.length,
-                        per_page: 50,
-                        current_page: 1,
-                        total_pages: 1,
-                        links: {},
-                    },
-                },
-            });
-            
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+        let serverData = null;
+        if (include && include === 'servers') {
+          serverData = await prisma.server.findMany({
+            where: { ownerId: { in: users.map((user) => user.id) } },
+            include: { node: true, owner: true },
+          });
         }
+    
+        const response = users.map((user) => {
+          const userData: any = {
+            object: 'user',
+            attributes: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              root_admin: user.isAdmin,
+            },
+            relationships: {
+              servers: [],
+            },
+          };
+    
+          if (include && include === 'servers' && serverData) {
+            userData.relationships.servers = serverData.filter((server) => server.ownerId === user.id).map((server) => ({
+              object: 'server',
+              attributes: {
+                id: server.id,
+                name: server.name,
+                node: server.node,
+              },
+            }));
+          }
+    
+          return userData;
+        });
+    
+        res.json({
+          object: 'list',
+          data: response,
+          meta: {
+            pagination: {
+              total: users.length,
+              count: users.length,
+              per_page: 50,
+              current_page: 1,
+              total_pages: 1,
+              links: {},
+            },
+          },
+        });
+            
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
     });
 
     router.get(
@@ -172,54 +172,54 @@ const coreModule: Module = {
 
           if (include === 'servers') {
             const servers = await prisma.server.findMany({
-                where: { ownerId: user.id },
-                include: { node: true, owner: true },
-              });
+              where: { ownerId: user.id },
+              include: { node: true, owner: true },
+            });
               
-              const formattedServers = servers.map((server) => ({
-                attributes: {
-                  id: server.id,
-                  UUID: server.UUID,
-                  name: server.name,
-                  description: server.description,
-                  createdAt: server.createdAt,
-                  ports: JSON.parse(server.Ports || '[]'),
-                  limits: {
-                    memory: server.Memory,
-                    disk: server.Storage,
-                    cpu: server.Cpu,
-                  },
-                  variables: JSON.parse(server.Variables || '[]'),
-                  startCommand: server.StartCommand,
-                  dockerImage: JSON.parse(server.dockerImage || '{}'),
-                  installing: server.Installing,
-                  suspended: server.Suspended,
+            const formattedServers = servers.map((server) => ({
+              attributes: {
+                id: server.id,
+                UUID: server.UUID,
+                name: server.name,
+                description: server.description,
+                createdAt: server.createdAt,
+                ports: JSON.parse(server.Ports || '[]'),
+                limits: {
+                  memory: server.Memory,
+                  disk: server.Storage,
+                  cpu: server.Cpu,
                 },
-                relationships: {
-                  node: {
-                    attributes: {
-                      id: server.node.id,
-                      name: server.node.name,
-                      ram: server.node.ram,
-                      cpu: server.node.cpu,
-                      disk: server.node.disk,
-                      address: server.node.address,
-                      port: server.node.port,
-                      key: server.node.key,
-                      createdAt: server.node.createdAt,
-                    },
-                  },
-                  owner: {
-                    attributes: {
-                      id: server.owner.id,
-                      email: server.owner.email,
-                      username: server.owner.username,
-                      isAdmin: server.owner.isAdmin,
-                      description: server.owner.description,
-                    },
+                variables: JSON.parse(server.Variables || '[]'),
+                startCommand: server.StartCommand,
+                dockerImage: JSON.parse(server.dockerImage || '{}'),
+                installing: server.Installing,
+                suspended: server.Suspended,
+              },
+              relationships: {
+                node: {
+                  attributes: {
+                    id: server.node.id,
+                    name: server.node.name,
+                    ram: server.node.ram,
+                    cpu: server.node.cpu,
+                    disk: server.node.disk,
+                    address: server.node.address,
+                    port: server.node.port,
+                    key: server.node.key,
+                    createdAt: server.node.createdAt,
                   },
                 },
-              }));
+                owner: {
+                  attributes: {
+                    id: server.owner.id,
+                    email: server.owner.email,
+                    username: server.owner.username,
+                    isAdmin: server.owner.isAdmin,
+                    description: server.owner.description,
+                  },
+                },
+              },
+            }));
 
             userResponse.attributes.relationships.servers = {
               object: 'server_list',
@@ -282,37 +282,37 @@ const coreModule: Module = {
     );
 
     router.post('/api/application/servers', validator, async (req: Request, res: Response) => {
-        const name = req.body.name;
-        const description = req.body.description || 'Server Generated by API';
-        const nodeId = Number(req.body.deploy.locations[0]);
-        const imageId = req.body.egg;
-        const Memory = req.body.limits.memory;
-        const Cpu = req.body.limits.cpu;
-        const Storage = req.body.limits.disk;
-        const variables = req.body.environment;
-        const dockerImage = req.body.docker_image;
+      const name = req.body.name;
+      const description = req.body.description || 'Server Generated by API';
+      const nodeId = Number(req.body.deploy.locations[0]);
+      const imageId = req.body.egg;
+      const Memory = req.body.limits.memory;
+      const Cpu = req.body.limits.cpu;
+      const Storage = req.body.limits.disk;
+      const variables = req.body.environment;
+      const dockerImage = req.body.docker_image;
       
-        const servers = await prisma.server.findMany({
-          where: { nodeId: nodeId },
-        });
+      const servers = await prisma.server.findMany({
+        where: { nodeId: nodeId },
+      });
       
-        const allPossiblePorts = Array.from({ length: 100 }, (_, i) => 25565 + i);
-        const usedPorts = servers.flatMap(server => 
-          JSON.parse(server.Ports).map((portInfo: { Port: string }) => parseInt(portInfo.Port.split(":")[0]))
-        );
+      const allPossiblePorts = Array.from({ length: 100 }, (_, i) => 25565 + i);
+      const usedPorts = servers.flatMap(server => 
+        JSON.parse(server.Ports).map((portInfo: { Port: string }) => parseInt(portInfo.Port.split(':')[0]))
+      );
       
-        const freePorts = allPossiblePorts.filter(port => !usedPorts.includes(port));
-        if (freePorts.length === 0) {
-          res.status(400).send('No Free Ports Found.');
-          return;
-        }
-        const randomFreePort = freePorts[Math.floor(Math.random() * freePorts.length)];
-        const Ports = `${randomFreePort}:${randomFreePort}`;
+      const freePorts = allPossiblePorts.filter(port => !usedPorts.includes(port));
+      if (freePorts.length === 0) {
+        res.status(400).send('No Free Ports Found.');
+        return;
+      }
+      const randomFreePort = freePorts[Math.floor(Math.random() * freePorts.length)];
+      const Ports = `${randomFreePort}:${randomFreePort}`;
       
-        const userId = req.body.user;
+      const userId = req.body.user;
       
-        if (
-          !name ||
+      if (
+        !name ||
           !description ||
           !nodeId ||
           !imageId ||
@@ -321,33 +321,33 @@ const coreModule: Module = {
           !Cpu ||
           !Storage ||
           !userId
-        ) {
-          res.status(400).send('Missing required fields');
+      ) {
+        res.status(400).send('Missing required fields');
+        return;
+      }
+      
+      const Port = `[{"Port": "${Ports}", "primary": true}]`;
+      
+      try {
+        const dockerImages = await prisma.images
+          .findUnique({
+            where: {
+              id: imageId,
+            },
+          })
+          .then((image) => {
+            if (!image) {
+              return null;
+            }
+            return image.dockerImages;
+          });
+      
+        if (!dockerImages) {
+          res.status(400).send('Docker image not found');
           return;
         }
       
-        const Port = `[{"Port": "${Ports}", "primary": true}]`;
-      
-        try {
-          const dockerImages = await prisma.images
-            .findUnique({
-              where: {
-                id: imageId,
-              },
-            })
-            .then((image) => {
-              if (!image) {
-                return null;
-              }
-              return image.dockerImages;
-            });
-      
-          if (!dockerImages) {
-            res.status(400).send('Docker image not found');
-            return;
-          }
-      
-          const imagesDocker = JSON.parse(dockerImages);
+        const imagesDocker = JSON.parse(dockerImages);
       
           type ImageDocker = { [key: string]: string };
       
@@ -510,11 +510,11 @@ const coreModule: Module = {
           }, 0);
       
           res.status(201).json({ message: 'Server created successfully', attributes: { id: server.UUID } });
-        } catch (error) {
-          logger.error('Error creating server:', error);
-          res.status(500).send('Error creating server');
-        }
-      });
+      } catch (error) {
+        logger.error('Error creating server:', error);
+        res.status(500).send('Error creating server');
+      }
+    });
 
     return router;
   },

@@ -6,46 +6,46 @@ const router = Router();
 
 // Wrap async controller methods to handle errors
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => 
-	(req: Request, res: Response, next: NextFunction) => {
-		Promise.resolve(fn(req, res, next)).catch(next);
-	};
+  (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
 
 // User routes
 router.get(
-	'/',
+  '/',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(UserController.getUsers)
 );
 
 router.get(
-	'/:id',
+  '/:id',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(UserController.getUserById)
 );
 
 router.post(
-	'/',
+  '/',
 	apiLimiter as RequestHandler,
 	asyncHandler(UserController.createUser)
 );
 
 router.put(
-	'/:id',
+  '/:id',
 	authenticateJWT as RequestHandler,
 	asyncHandler(UserController.updateUser)
 );
 
 router.delete(
-	'/:id',
+  '/:id',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(UserController.deleteUser)
 );
 
 router.post(
-	'/login',
+  '/login',
 	apiLimiter as RequestHandler,
 	asyncHandler(UserController.login)
 );

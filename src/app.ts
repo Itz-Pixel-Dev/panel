@@ -106,20 +106,22 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Load modules, plugins, database and start the webserver
-databaseLoader()
-  .then(async () => {
+async function initializeServer() {
+  try {
+    await databaseLoader();
     await settingsLoader();
-    return loadModules(app, airlinkVersion).then(async () => {
-      loadPlugins(app);
-    });
-  })
-  .then(() => {
+    await loadModules(app, airlinkVersion);
+    await loadPlugins(app);
+
     app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });
-  })
-  .catch((err) => {
+  } catch (err) {
     logger.error('Failed to load modules or database:', err);
-  });
+    process.exit(1);
+  }
+}
+
+initializeServer();
 
 export default app;

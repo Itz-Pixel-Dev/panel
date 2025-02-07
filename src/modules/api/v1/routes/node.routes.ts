@@ -6,48 +6,48 @@ const router = Router();
 
 // Wrap async controller methods to handle errors
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => 
-	(req: Request, res: Response, next: NextFunction) => {
-		Promise.resolve(fn(req, res, next)).catch(next);
-	};
+  (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
 
 // Node routes (admin only)
 router.get(
-	'/',
+  '/',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(NodeController.getNodes)
 );
 
 router.get(
-	'/:id',
+  '/:id',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(NodeController.getNodeById)
 );
 
 router.post(
-	'/',
+  '/',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(NodeController.createNode)
 );
 
 router.put(
-	'/:id',
+  '/:id',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(NodeController.updateNode)
 );
 
 router.delete(
-	'/:id',
+  '/:id',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(NodeController.deleteNode)
 );
 
 router.get(
-	'/:id/stats',
+  '/:id/stats',
 	authenticateJWT as RequestHandler,
 	authorize('admin') as RequestHandler,
 	asyncHandler(NodeController.getNodeStats)
