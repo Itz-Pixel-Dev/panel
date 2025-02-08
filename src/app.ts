@@ -22,7 +22,6 @@ import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
 import { loadPlugins } from './handlers/pluginHandler';
-import adminApiRoutes from './modules/api/v1/routes/admin.routes';
 
 loadEnv();
 
@@ -86,9 +85,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Admin API routes
-app.use('/admin', adminApiRoutes);
-
 // Load error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
@@ -106,22 +102,20 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Load modules, plugins, database and start the webserver
-async function initializeServer() {
-  try {
-    await databaseLoader();
+databaseLoader()
+  .then(async () => {
     await settingsLoader();
-    await loadModules(app, airlinkVersion);
-    await loadPlugins(app);
-
+    return loadModules(app, airlinkVersion).then(async () => {
+      loadPlugins(app);
+    });
+  })
+  .then(() => {
     app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });
-  } catch (err) {
+  })
+  .catch((err) => {
     logger.error('Failed to load modules or database:', err);
-    process.exit(1);
-  }
-}
-
-initializeServer();
+  });
 
 export default app;

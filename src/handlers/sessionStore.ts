@@ -34,10 +34,6 @@ class PrismaSessionStore extends session.Store {
         session_id: sid,
         data: JSON.stringify(session),
         expires: new Date(Date.now() + (session.cookie.maxAge || 3600000 * 72)),
-        userId: session.userId || null,
-        ipAddress: session.ipAddress || null,
-        userAgent: session.userAgent || null,
-        isValid: true
       };
 
       await prisma.session.upsert({
@@ -89,9 +85,6 @@ class PrismaSessionStore extends session.Store {
           data: JSON.stringify(session),
           expires: new Date(Date.now() + (session.cookie.maxAge || 3600000)),
           updatedAt: new Date(),
-          userId: session.userId || null,
-          ipAddress: session.ipAddress || null,
-          userAgent: session.userAgent || null
         },
       });
       callback();

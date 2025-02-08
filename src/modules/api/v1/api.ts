@@ -1,18 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../../handlers/moduleInit';
-import userRoutes from './routes/user.routes';
-import serverRoutes from './routes/server.routes';
-import nodeRoutes from './routes/node.routes';
-import apiKeyRoutes from './routes/apikey.routes';
-import { validateApiKey, apiLimiter, ipSecurity } from './middleware/auth.middleware';
-import cors from 'cors';
-import helmet from 'helmet';
-import express from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const coreModule: Module = {
   info: {
-    name: 'API Module',
-    description: 'REST API for Airlink Panel',
+    name: 'Core Module',
+    description: 'This file is for all core functionality.',
     version: '1.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -20,66 +15,34 @@ const coreModule: Module = {
   },
 
   router: () => {
+    let validKeys: string[] = [];
+
+    async function loadApiKeys() {
+      try {
+        const keys = await prisma.apiKey.findMany();
+        validKeys = keys.map((key) => key.key);
+      } catch (error) {
+        console.error('Error loading API keys:', error);
+      }
+    }
+
+    async function validator(req: Request, res: Response, next: NextFunction) {
+      await loadApiKeys();
+      const apiKey = req.headers['api-key'] as string;
+      if (validKeys.includes(apiKey)) {
+        next();
+      } else {
+        console.log('Invalid API key:', apiKey);
+        res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
+      }
+    }
+
     const router = Router();
-    const v1Router = Router();
 
-    // Security middleware
-    router.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ['\'self\''],
-          scriptSrc: ['\'self\'', '\'unsafe-inline\''],
-          styleSrc: ['\'self\'', '\'unsafe-inline\''],
-          imgSrc: ['\'self\'', 'data:', 'https:'],
-        }
-      },
-      hidePoweredBy: true,
-      noSniff: true,
-      referrerPolicy: { policy: 'same-origin' }
-    }));
-
-    router.use(cors({
-      origin: process.env.CORS_ORIGIN || '*',
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-      credentials: true,
-      maxAge: 86400
-    }));
-
-    router.use(express.json({ limit: '1mb' }));
-    router.use(express.urlencoded({ extended: true }));
-    router.use(apiLimiter);
-    router.use(ipSecurity);
-
-    // Mount route handlers
-    v1Router.use('/users', userRoutes);
-    v1Router.use('/servers', serverRoutes);
-    v1Router.use('/nodes', nodeRoutes);
-    v1Router.use('/api-keys', apiKeyRoutes);
-
-    // Mount v1 router under /api/v1
-    router.use('/api/v1', v1Router);
-
-    // Error handling middleware
-    router.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-      console.error(err.stack);
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
-      });
-    });
-
-    // 404 handler
-    router.use((_req: Request, res: Response) => {
-      res.status(404).json({
-        error: 'Not Found',
-        message: 'The requested resource was not found'
-      });
-    });
+    // here we do the API stuff
 
     return router;
   },
 };
 
 export default coreModule;
-

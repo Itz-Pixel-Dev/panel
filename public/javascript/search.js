@@ -30,7 +30,15 @@ function filterLinks(searchTerm) {
   if (filteredLinks.length === 0) {
     const noResultsMessage = document.createElement('p');
     noResultsMessage.textContent = 'No results found.';
-    noResultsMessage.classList.add('text-gray-400', 'text-sm', 'mt-4');
+    noResultsMessage.classList.add(
+      'text-gray-500',
+      'dark:text-gray-500',
+      'text-sm',
+      'mt-4',
+      'px-4',
+      'font-medium'
+    );
+
     searchResults.appendChild(noResultsMessage);
   } else {
     filteredLinks.forEach((link, index) => {
@@ -39,38 +47,62 @@ function filterLinks(searchTerm) {
       resultLink.onclick = () => {
         location.href = link.href;
       };
-      resultLink.classList.add(
-        'nav-link',
-        'transition',
-        'text-gray-600',
-        'hover:bg-gray-100',
-        'backdrop-blur',
-        'hover:text-gray-800',
-        'group',
-        'flex',
-        'items-center',
-        'px-4',
-        'mt-1',
-        'py-2',
-        'text-sm',
-        'font-medium',
-        'rounded-xl',
-        'hover:border',
-        'hover:border-neutral-800/20'
-      );
-
-      if (index === 0) {
-        selected = resultLink.href;
         resultLink.classList.add(
-          'bg-gray-200',
+          'nav-link',
+          'transition-all',
+          'duration-200',
+          'ease-out',
+          'text-gray-700',
+          'dark:text-neutral-100',
+          'hover:bg-white/60',
+          'dark:hover:bg-gray-800/60',
+          'hover:text-gray-900',
+          'dark:hover:text-white',
+          'group',
+          'flex',
+          'items-center',
+          'px-4',
+          'mt-1',
+          'py-2',
+          'text-sm',
+          'font-medium',
+          'rounded-xl',
+          'border',
+          'border-transparent',
+          'hover:border-neutral-800/10',
+          'dark:hover:border-white/10',
+          'hover:translate-x-0.5',
+          'hover:scale-[1.02]',
+          'active:scale-100',
+          'transform',
+          'backdrop-blur-xl',
+          'bg-white/20',
+          'dark:bg-gray-800/20'
+        );
+
+        if (window.location.href === resultLink.href) {
+        selected = resultLink.href;
+        if (index === 0) {
+          resultLink.classList.add(
+          'mt-2',
+          );
+        }
+
+        resultLink.classList.add(
+          'bg-white/40',
+          'dark:bg-gray-800/40',
           'text-gray-900',
+          'dark:text-white',
           'font-semibold',
           'searchLinkActive',
-          'mt-4',
           'border',
-          'border-neutral-800/20'
+          'border-neutral-800/10',
+          'dark:border-white/10',
+          'scale-[1.02]',
+          'translate-x-0.5'
         );
-      }
+        }
+
 
       const originalIcon = link.querySelector('svg');
       let icon;
@@ -83,16 +115,26 @@ function filterLinks(searchTerm) {
       linkText.textContent = link.textContent;
 
       const breadcrumbBadge = document.createElement('span');
-      breadcrumbBadge.classList.add(
-        'breadcrumb',
-        'bg-gray-200',
-        'text-gray-600',
-        'rounded-md',
-        'ml-2',
-        'text-xs',
-        'px-2',
-        'py-1'
-      );
+        breadcrumbBadge.classList.add(
+          'breadcrumb',
+          'bg-white/30',
+          'dark:bg-gray-800/30',
+          'text-gray-600',
+          'dark:text-neutral-100',
+          'rounded-md',
+          'ml-2',
+          'text-xs',
+          'px-2',
+          'py-1',
+          'transition-all',
+          'duration-200',
+          'group-hover:bg-white/40',
+          'dark:group-hover:bg-gray-700/40',
+          'group-hover:translate-x-0.5',
+          'transform',
+          'backdrop-blur-sm'
+        );
+
       breadcrumbBadge.innerHTML = getBreadcrumbWithHomeIcon(link.href);
 
       if (icon) resultLink.appendChild(icon);
@@ -116,7 +158,7 @@ function getBreadcrumbWithHomeIcon(href) {
   `;
 
   const arrowIcon = `
-    <svg class="h-5 w-5 -mr-2 -ml-2 flex-shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <svg class="h-5 w-5 -mr-2 -ml-2 flex-shrink-0 text-gray-400 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
       <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
     </svg>
   `;

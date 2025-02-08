@@ -1,23 +1,10 @@
-import { Users, Permission } from '@prisma/client';
+import 'express';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        id: number;
-        email: string;
-        isAdmin: boolean;
-        permissions: Permission[];
-        servers: number[];
-        securityContext: {
-          ipAddress: string;
-          userAgent: string;
-          timestamp: Date;
-          requestPath: string;
-        };
-      };
+      file?: Express.Multer.File;
+      files?: Express.Multer.File[];
     }
   }
 }
-
-export {};
